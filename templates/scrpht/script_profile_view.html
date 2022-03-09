@@ -1,0 +1,42 @@
+    <script>
+    let log_Info = document.cookie
+                                    .split(';')
+                                    .map(cookie => cookie.split('='))
+                                    .reduce((accumulator, [key, value]) => ({ ...accumulator, [key.trim()]: decodeURIComponent(value) }), {});
+
+    if (log_Info.access){
+        $('#sign_in').hide()
+        $('#sign_up').hide()
+        $('#profile').show()
+        $('#user').html(`${log_Info.main_name}`)
+        {#$('#user').html(`${log_Info.user_role}`)#}
+    }
+    else {
+        $('#sign_in').show()
+        $('#sign_up').show()
+        $('#profile').hide()
+    }
+
+    let x = `${log_Info.user_id}`
+    let url_s = "http://127.0.0.1:8000/profile/student/"+x+"/"
+    console.log(url_s)
+    $.ajax({
+        type: "GET",
+        url: url_s,
+        success: function (value){
+            $('.card').append(`
+               <div id="main-${ value.id }">
+                    <div class="card-header">
+                        <div class="col-md-8 justify-content-center">
+                            <img src="${ value.profile_pic }" class="card-img" alt="...">
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <h5 class="card-title">Name : ${ value.full_name }</h5>
+                        <p class="card-text">Email : ${ value.email }</p>
+                        <p class="card-text">Phone :  ${ value.phone }</p>
+                    </div>
+               </div>
+        `)}
+    });
+    </script>

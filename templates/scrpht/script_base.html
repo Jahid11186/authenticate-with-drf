@@ -1,0 +1,19 @@
+<script>
+    let log_Info = document.cookie
+                                    .split(';')
+                                    .map(cookie => cookie.split('='))
+                                    .reduce((accumulator, [key, value]) => ({ ...accumulator, [key.trim()]: decodeURIComponent(value) }), {});
+
+    if (log_Info.access){
+        $('#sign_in').hide()
+        $('#sign_up').hide()
+        $('#profile').show()
+        $('#user').html(`${log_Info.main_name}`)
+        {#$('#user').html(`${log_Info.user_role}`)#}
+    }
+    else {
+        $('#sign_in').show()
+        $('#sign_up').show()
+        $('#profile').hide()
+    }
+</script>

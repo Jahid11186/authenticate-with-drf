@@ -1,0 +1,97 @@
+{% extends 'layout/base.html' %}
+{% block title %} Sign Up {% endblock %}
+
+{% block body %}
+    <div id="main_input" class="text-center">
+        <br>
+        <h1 class="text-center">Sign Up</h1>
+        <hr>
+        <form enctype="multipart/form-data" id="signup_form" method="POST" action="#">
+            {% csrf_token %}
+            <label for="role">Who are you: </label><br>
+            <select id="role" name="role">
+                <option value="Teacher">Teacher</option>
+                <option value="Student">Student</option>
+            </select><br>
+            <label for="full_name">Full name: </label><br>
+            <input required type="text" id="full_name" name="full_name" placeholder="Full Name"><br>
+            <label for="email">Email:</label><br>
+            <input required pattern="^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$" title="Please enter a valid email." type="text" id="email" name="email" placeholder="Email"><br>
+            <label for="phone">Phone Number:</label><br>
+            <input required pattern="^01[13-9]\d{8}$" title ="enter a valid phone number." type="text" id="phone" name="phone" placeholder="Phone Number"><br>
+            <label  for="password">Password:</label><br>
+            <input required pattern="(?=.?[0-9])(?=.?[A-Za-z]).+" title ="Please enter a valid password." type="password" id="password" name="password" value="" placeholder="Password"><br>
+            <p id="error"></p>
+            <br>
+{#            <input type="submit" value="Create Account" id="sign_up_submit">#}
+            <div><button type="submit" class="btn btn-outline-success">Create Account</button></div>
+        </form>
+    </div>
+
+    <div id="main_otp" class="text-center">
+        <p id="error"></p>
+        <label for="otp">OTP:</label><br>
+        <input type="text" id="otp" name="otp" value="" placeholder="Please provide a OTP"><br>
+        <input type="button" value="Activate Account" id="otp_submission">
+    </div>
+
+    <div class="text-center" id="switch"></div>
+
+    <script>
+        $('#sign_up').addClass('active')
+        $('#main_otp').hide()
+        $('#signup_form').submit(function (event){
+            event.preventDefault()
+            let data_str = new FormData(document.getElementById('signup_form'))
+            let url_path = "http://127.0.0.1:8000/registration/api/signup/"
+            $.ajax({
+                type: "POST",
+                headers : { "X-CSRFToken": '{{ csrf_token }}' },
+                enctype: 'multipart/form-data',
+                processData: false,
+                async: false,
+                cache: false,
+                contentType: false,
+                url: url_path,
+                data: data_str,
+                success: function (value){
+                    console.log(value)
+                    if (value.status == 200){
+                        localStorage.setItem('role', value.role)
+                        localStorage.setItem('email', value.email)
+                        $('#main_input').hide()
+                        $('#main_otp').show()
+                    }
+                },
+                error: function (errormsg){
+                    console.log(errormsg)
+                    console.log("What ???")
+                }
+            });
+        })
+
+        $('#otp_submission').click(function (){
+            let url_path = "http://127.0.0.1:8000/registration/api/otp_check/"
+            let data = {}
+            data['role'] = localStorage.getItem('role')
+            data['email'] = localStorage.getItem('email')
+            data['otp'] = $('#otp').val()
+            $.ajax({
+                type: "PUT",
+                url: url_path,
+                data: JSON.stringify(data),
+                success: function (data){
+                    console.log(data)
+                    if (data.status == 200){
+                        $('#main_otp').html("Account Verification Succeed")
+                    }else {
+                        $('#error').html(data.message)
+                    }
+                },
+                error: function (errormsg){
+                    $('#error').html(errormsg.message)
+                }
+            });
+        })
+    </script>
+{% endblock %}
